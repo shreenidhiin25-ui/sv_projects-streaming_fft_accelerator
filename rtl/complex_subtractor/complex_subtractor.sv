@@ -21,7 +21,7 @@ module complex_subtractor #(
     input logic signed [WIDTH-1:0] b_imag,
     output logic signed [WIDTH-1:0] q_real,
     output logic signed [WIDTH-1:0] q_imag
-)
+);
 
  assign q_real = a_real-b_real;
  assign q_imag = a_imag-b_imag;
