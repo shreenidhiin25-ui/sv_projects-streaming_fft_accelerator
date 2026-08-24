@@ -27,7 +27,7 @@ A parameterized, fixed-point, **8-point radix-2 FFT accelerator** written in syn
 15. [Design Decisions](#15-design-decisions)
 16. [Current Limitations](#16-current-limitations)
 17. [Future Improvements](#17-future-improvements)
-18. [How I Explain This Project in an Interview](#18-how-i-explain-this-project-in-an-interview)
+
 
 ---
 
@@ -514,16 +514,4 @@ Clearly marked **FUTURE WORK** — none of this exists yet:
 
 ---
 
-## 18. How I Explain This Project in an Interview
 
-> "I built a streaming FFT accelerator in SystemVerilog — the FFT is the O(N·log N) algorithm at the heart of OFDM modems, and it's implemented in hardware because it sits in the sample-rate path where a processor can't keep up. My design is an 8-point, 16-bit fixed-point engine with a fully serial interface: one complex sample per clock in, one per clock out.
->
-> Architecturally, samples stream into two synchronous FIFOs — real and imaginary — then an FSM unloads them into a parallel capture register, carefully absorbing the FIFO's one-cycle registered-read latency with an extra unload cycle. The compute core is a three-stage pipelined cascade; each stage is four parallel radix-2 butterflies, and each butterfly is built bottom-up from a complex adder, a complex subtractor, and a twiddle multiplier — it's the DIF form: sum path is A+B, and the difference A−B goes through the multiplier. The multiplier works in Q1.15: full 32-bit products, then an arithmetic right shift by 15 to rescale — arithmetic, not logical, so sign is preserved. A six-state Moore FSM — idle, load, unload, compute, drain, done — sequences everything and generates every enable; the drain state muxes the parallel result back out one sample per clock with a valid flag. That's 28 cycles per frame for N=8, straight from the FSM.
->
-> For verification I wrote directed self-checking testbenches per module and UVM environments — full agent/driver/monitor/scoreboard for the arithmetic units, and for the top level a packaged UVM env with split input and output agents, a virtual sequencer, a predictor, a scoreboard, and a coverage subscriber on an analysis port.
->
-> I'm deliberately upfront about scope: stages two and three reuse the stage-one structure — same pairing, one twiddle per stage — so it's not a textbook FFT recursion yet, and my reference models check bit-exactly against what I actually built. The roadmap is per-butterfly twiddle scheduling, bit reversal, and a true SDF streaming pipeline — the controller already has the hooks for it."
-
----
-
-*See `ENGINEERING_LOGBOOK.md` for the day-by-day design history, and `docs/` for per-module specifications.*
